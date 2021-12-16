@@ -8,5 +8,5 @@ class Rustc(Linter):
     defaults = {
         'selector': 'source.rust'
     }
-    error_stream = util.STREAM_STDERR
+    on_stderr = None
     name = 'rustc'

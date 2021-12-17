@@ -9,12 +9,20 @@ class Rustc(Linter):
     error_stream = STREAM_STDERR
     name = 'rustc'
     on_stderr = None
+
     def find_errors(self, output):
+
         for i in output.split('\n'):
             error = json.loads(i)
+
+            if error['spans'] == []:
+                continue
+
             long_message = error['message']
+
             for child in error['children']:
                 long_message+="\n{}: {}".format(child['level'], child['message'])
+
             yield LintMatch(
                 line = error['spans'][0]['line_start'],
                 end_line = error['spans'][0]['line_end'],

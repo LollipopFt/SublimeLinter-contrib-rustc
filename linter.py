@@ -2,7 +2,7 @@ from SublimeLinter.lint import Linter, LintMatch, STREAM_STDERR  # or NodeLinter
 import json
 
 class Rustc(Linter):
-    cmd = ('rustc', '--error-format=json', '${file}')
+    cmd = ('rustc', '--error-format=json', '--emit=mir -o /dev/null', '${file}')
     defaults = {
         'selector': 'source.rust'
     }

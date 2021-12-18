@@ -13,10 +13,7 @@ class Rustc(Linter):
     def find_errors(self, output):
 
         for i in output.split('\n'):
-            try:
-                error = json.loads(i)
-            except ValueError:
-                print(error)
+            error = json.loads(i)
 
             if error['spans'] == []:
                 continue

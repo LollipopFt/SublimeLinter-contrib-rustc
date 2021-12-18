@@ -7,6 +7,7 @@ class Rustc(Linter):
         'selector': 'source.rust'
     }
     error_stream = STREAM_STDERR
+    line_col_base = (0, 0)
     name = 'rustc'
     on_stderr = None
 

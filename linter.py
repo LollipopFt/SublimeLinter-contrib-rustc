@@ -7,7 +7,6 @@ class Rustc(Linter):
         'selector': 'source.rust'
     }
     error_stream = STREAM_STDERR
-    line_col_base = (-1, -1)
     name = 'rustc'
     on_stderr = None
 
@@ -28,11 +27,11 @@ class Rustc(Linter):
                 long_message+="\n{}: {}".format(child['level'], child['message'])
 
             yield LintMatch(
-                line = error['spans'][0]['line_start'],
-                end_line = error['spans'][0]['line_end'],
+                line = error['spans'][0]['line_start']-1,
+                end_line = error['spans'][0]['line_end']-1,
                 message = long_message,
-                col = error['spans'][0]['column_start'],
-                end_col = error['spans'][0]['column_end'],
+                col = error['spans'][0]['column_start']-1,
+                end_col = error['spans'][0]['column_end']-1,
                 error_type = error['level'],
                 near = error['spans'][0]['text'][0]['text'],
                 code = error['code']['code'],

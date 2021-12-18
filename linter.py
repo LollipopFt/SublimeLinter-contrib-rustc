@@ -17,14 +17,15 @@ class Rustc(Linter):
                 error = json.loads(i)
             except ValueError:
                 continue
-
             if error['spans'] == []:
                 continue
-
             long_message = error['message']
-
             for child in error['children']:
                 long_message+="\n{}: {}".format(child['level'], child['message'])
+            if error['code'] != None:
+                code = error['code']['code']
+            else:
+                code = ''
 
             yield LintMatch(
                 line = error['spans'][0]['line_start']-1,
@@ -34,6 +35,6 @@ class Rustc(Linter):
                 end_col = error['spans'][0]['column_end']-1,
                 error_type = error['level'],
                 near = error['spans'][0]['text'][0]['text'],
-                code = error['code']['code'],
+                code = code,
                 filename = error['spans'][0]['file_name']
             )

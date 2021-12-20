@@ -1,5 +1,6 @@
-from SublimeLinter.lint import Linter, LintMatch, STREAM_STDERR  # or NodeLinter, PythonLinter, ComposerLinter, RubyLinter
 import json
+from SublimeLinter.lint import Linter, LintMatch, STREAM_STDERR  # or NodeLinter, PythonLinter, ComposerLinter, RubyLinter
+
 
 class Rustc(Linter):
     cmd = ('rustc', '--error-format=json', '--emit=mir', '-o', '/dev/null', '${file}')
@@ -13,31 +14,43 @@ class Rustc(Linter):
     def find_errors(self, output):
 
         for i in output.split('\n'):
+
             try:
                 error = json.loads(i)
             except ValueError:
                 continue
+
             if error['spans'] == []:
                 continue
+
             long_message = error['message']
             for child in error['children']:
-                long_message+="\n{}: {}".format(child['level'], child['message'])
-            if error['code'] != None:
+                long_message += "\n{}: {}".format(child['level'], child['message'])
+
+            if error['code'] is not None:
                 code = error['code']['code']
             else:
                 code = ''
-            for i in error['spans']:
-                if i['file_name'] == self.context.get('file'):
+
+            for span in error['spans']:
+
+                def linenumber(num):
+                    if num == 1:
+                        return 1
+                    return num-1
+
+                if span['file_name'] == self.context.get('file'):
+
                     yield LintMatch(
-                        line = i['line_start']-1,
-                        end_line = i['line_end']-1,
-                        message = long_message,
-                        col = i['column_start']-1,
-                        end_col = i['column_end']-1,
-                        error_type = error['level'],
-                        near = i['text'][0]['text'],
-                        code = code,
-                        filename = i['file_name']
+                        line=linenumber(span['line_start']),
+                        end_line=linenumber(span['line_end']),
+                        message=long_message,
+                        col=linenumber(span['column_start']),
+                        end_col=linenumber(span['column_end']-1),
+                        error_type=error['level'],
+                        near=span['text'][0]['text'],
+                        code=code,
+                        filename=span['file_name']
                     )
                 else:
                     continue

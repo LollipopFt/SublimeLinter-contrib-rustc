@@ -28,17 +28,16 @@ class Rustc(Linter):
                 code = ''
             for i in error['spans']:
                 if i['is_primary'] == True:
-                    return i
-                    break
-
-            yield LintMatch(
-                line = i['line_start']-1,
-                end_line = i['line_end']-1,
-                message = long_message,
-                col = i['column_start']-1,
-                end_col = i['column_end']-1,
-                error_type = error['level'],
-                near = i['text'][0]['text'],
-                code = code,
-                filename = i['file_name']
-            )
+                    yield LintMatch(
+                        line = i['line_start']-1,
+                        end_line = i['line_end']-1,
+                        message = long_message,
+                        col = i['column_start']-1,
+                        end_col = i['column_end']-1,
+                        error_type = error['level'],
+                        near = i['text'][0]['text'],
+                        code = code,
+                        filename = i['file_name']
+                    )
+                else:
+                    continue

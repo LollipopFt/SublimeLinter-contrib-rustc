@@ -27,7 +27,7 @@ class Rustc(Linter):
             else:
                 code = ''
             for i in error['spans']:
-                if i['file_name'] == '${file}':
+                if i['file_name'] == self.context.get('file'):
                     yield LintMatch(
                         line = i['line_start']-1,
                         end_line = i['line_end']-1,

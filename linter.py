@@ -41,6 +41,9 @@ class Rustc(Linter):
 
                 if span['file_name'] == self.context.get('file'):
 
+                    if span['suggested_replacement'] is not None:
+                        long_message += "\nsuggest: {}".format(span['suggested_replacement'])
+
                     yield LintMatch(
                         line=linenumber(span['line_start']),
                         end_line=linenumber(span['line_end']),

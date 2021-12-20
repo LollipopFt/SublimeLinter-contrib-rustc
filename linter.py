@@ -49,11 +49,10 @@ class Rustc(Linter):
                         end_line=linenumber(span['line_end']),
                         message=long_message,
                         col=linenumber(span['column_start']),
-                        end_col=linenumber(span['column_end']-1),
+                        end_col=linenumber(span['column_end']),
                         error_type=error['level'],
                         near=span['text'][0]['text'],
                         code=code,
                         filename=span['file_name']
                     )
-                else:
-                    continue
+                    break

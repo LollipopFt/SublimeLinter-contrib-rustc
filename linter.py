@@ -13,22 +13,40 @@ class Rustc(Linter):
 
     def find_errors(self, output):
 
-        def recurse(parsed_json):
+        for i in output.split('\n'):
 
-            if parsed_json['spans'] == []:
-                return ''
+            try:
+                error = json.loads(i)
+            except ValueError:
+                continue
 
-            long_message = parsed_json['message']
-            if parsed_json['children'] != []:
-                for child in parsed_json['children']:
-                    recurse(child)
+            if error['spans'] == []:
+                continue
 
-            if parsed_json['code'] is not None:
-                code = parsed_json['code']['code']
+            if error['code'] is not None:
+                code = error['code']['code']
             else:
                 code = ''
 
-            for span in parsed_json['spans']:
+            for span in error['spans']:
+
+                long_message = error['message']
+
+                for child in error['children']:
+                    if child['spans'] == []:
+                        long_message += "\n{}: {}".format(child['level'], child['message'])
+                    else:
+                        message = child['message']
+                        message += "\nsuggest: {}".format(child['spans'][0]['suggested_replacement'])
+                        yield LintMatch(
+                            line=child['spans'][0]['line_start']-1,
+                            end_line=child['spans'][0]['line_end']-1,
+                            message=message,
+                            col=child['spans'][0]['column_start']-1,
+                            end_col=child['spans'][0]['column_end']-1,
+                            error_type=child['level'],
+                            filename=child['spans'][0]['file_name']
+                        )
 
                 if span['suggested_replacement'] is not None:
                     long_message += "\nsuggest: {}".format(span['suggested_replacement'])
@@ -39,20 +57,7 @@ class Rustc(Linter):
                     message=long_message,
                     col=span['column_start']-1,
                     end_col=span['column_end']-1,
-                    error_type=parsed_json['level'],
+                    error_type=error['level'],
                     code=code,
                     filename=span['file_name']
                 )
-            return ''
-
-        for i in output.split('\n'):
-
-            try:
-                error = json.loads(i)
-            except ValueError:
-                continue
-
-            try:
-                recurse(error)
-            except TypeError:
-                continue

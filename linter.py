@@ -19,7 +19,7 @@ class Rustc(Linter):
                 return
 
             long_message = parsed_json['message']
-            if parsed_json['children'] is not None:
+            if parsed_json['children'] != []:
                 for child in parsed_json['children']:
                     long_message += "\n{}: {}".format(child['level'], child['message'])
                     recurse(child)
@@ -45,12 +45,12 @@ class Rustc(Linter):
                     filename=span['file_name']
                 )
 
-
         for i in output.split('\n'):
 
             try:
                 error = json.loads(i)
+                recurse(error)
             except ValueError:
                 continue
-
-            recurse(error)
+            except TypeError:
+                continue

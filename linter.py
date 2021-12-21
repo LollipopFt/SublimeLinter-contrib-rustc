@@ -16,7 +16,7 @@ class Rustc(Linter):
         def recurse(parsed_json):
 
             if parsed_json['spans'] == []:
-                return
+                return ''
 
             long_message = parsed_json['message']
             if parsed_json['children'] != []:
@@ -43,13 +43,16 @@ class Rustc(Linter):
                     code=code,
                     filename=span['file_name']
                 )
+            return ''
 
         for i in output.split('\n'):
 
             try:
                 error = json.loads(i)
-                recurse(error)
             except ValueError:
                 continue
+
+            try:
+                recurse(error)
             except TypeError:
                 continue

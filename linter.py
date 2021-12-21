@@ -1,5 +1,5 @@
 import json
-from SublimeLinter.lint import Linter, LintMatch, STREAM_STDERR  # or NodeLinter, PythonLinter, ComposerLinter, RubyLinter
+from SublimeLinter.lint import Linter, LintMatch, STREAM_STDERR
 
 
 class Rustc(Linter):
@@ -19,8 +19,10 @@ class Rustc(Linter):
                 return
 
             long_message = parsed_json['message']
-            for child in parsed_json['children']:
-                long_message += "\n{}: {}".format(child['level'], child['message'])
+            if parsed_json['children'] is not None:
+                for child in parsed_json['children']:
+                    long_message += "\n{}: {}".format(child['level'], child['message'])
+                    recurse(child)
 
             if parsed_json['code'] is not None:
                 code = parsed_json['code']['code']
@@ -42,8 +44,7 @@ class Rustc(Linter):
                     code=code,
                     filename=span['file_name']
                 )
-            for nested_json in parsed_json['children']:
-                recurse(nested_json)
+
 
         for i in output.split('\n'):
 

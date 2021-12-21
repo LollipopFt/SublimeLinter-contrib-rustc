@@ -21,7 +21,6 @@ class Rustc(Linter):
             long_message = parsed_json['message']
             if parsed_json['children'] != []:
                 for child in parsed_json['children']:
-                    long_message += "\n{}: {}".format(child['level'], child['message'])
                     recurse(child)
 
             if parsed_json['code'] is not None:

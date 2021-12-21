@@ -13,6 +13,38 @@ class Rustc(Linter):
 
     def find_errors(self, output):
 
+        def recurse(parsed_json):
+
+            if parsed_json['spans'] == []:
+                return
+
+            long_message = parsed_json['message']
+            for child in parsed_json['children']:
+                long_message += "\n{}: {}".format(child['level'], child['message'])
+
+            if parsed_json['code'] is not None:
+                code = parsed_json['code']['code']
+            else:
+                code = ''
+
+            for span in parsed_json['spans']:
+
+                if span['suggested_replacement'] is not None:
+                    long_message += "\nsuggest: {}".format(span['suggested_replacement'])
+
+                yield LintMatch(
+                    line=span['line_start']-1,
+                    end_line=span['line_end']-1,
+                    message=long_message,
+                    col=span['column_start']-1,
+                    end_col=span['column_end']-1,
+                    error_type=parsed_json['level'],
+                    code=code,
+                    filename=span['file_name']
+                )
+            for nested_json in parsed_json['children']:
+                recurse(nested_json)
+
         for i in output.split('\n'):
 
             try:
@@ -20,39 +52,4 @@ class Rustc(Linter):
             except ValueError:
                 continue
 
-            if error['spans'] == []:
-                continue
-
-            long_message = error['message']
-            for child in error['children']:
-                long_message += "\n{}: {}".format(child['level'], child['message'])
-
-            if error['code'] is not None:
-                code = error['code']['code']
-            else:
-                code = ''
-
-            for span in error['spans']:
-
-                def linenumber(num):
-                    if num == 1:
-                        return 1
-                    return num-1
-
-                if span['file_name'] == self.context.get('file'):
-
-                    if span['suggested_replacement'] is not None:
-                        long_message += "\nsuggest: {}".format(span['suggested_replacement'])
-
-                    yield LintMatch(
-                        line=linenumber(span['line_start']),
-                        end_line=linenumber(span['line_end']),
-                        message=long_message,
-                        col=linenumber(span['column_start']),
-                        end_col=linenumber(span['column_end']),
-                        error_type=error['level'],
-                        near=span['text'][0]['text'],
-                        code=code,
-                        filename=span['file_name']
-                    )
-                    break
+            recurse(error)

@@ -29,24 +29,7 @@ class Rustc(Linter):
                 code = ''
 
             for span in error['spans']:
-
                 long_message = error['message']
-
-                for child in error['children']:
-                    if child['spans'] == []:
-                        long_message += "\n{}: {}".format(child['level'], child['message'])
-                    else:
-                        message = child['message']
-                        message += "\nsuggest: {}".format(child['spans'][0]['suggested_replacement'])
-                        yield LintMatch(
-                            line=child['spans'][0]['line_start']-1,
-                            end_line=child['spans'][0]['line_end']-1,
-                            message=message,
-                            col=child['spans'][0]['column_start']-1,
-                            end_col=child['spans'][0]['column_end']-1,
-                            error_type=child['level'],
-                            filename=child['spans'][0]['file_name']
-                        )
 
                 if span['suggested_replacement'] is not None:
                     long_message += "\nsuggest: {}".format(span['suggested_replacement'])
@@ -61,3 +44,25 @@ class Rustc(Linter):
                     code=code,
                     filename=span['file_name']
                 )
+
+            if error['children'] == []:
+                continue
+            for child in error['children']:
+                if child['code'] is not None:
+                    code = child['code']
+                else:
+                    code = ''
+                for cspan in child['spans']:
+                    long_message = child['message']
+                    if cspan['suggested_replacement'] is not None:
+                        long_message += "\nsuggest: {}".format(cspan['suggested_replacement'])
+                    yield LintMatch(
+                        line=cspan['line_start']-1,
+                        end_line=cspan['line_end']-1,
+                        message=long_message,
+                        col=cspan['column_start']-1,
+                        end_col=cspan['column_end']-1,
+                        error_type=cspan['level'],
+                        code=code,
+                        filename=cspan['file_name']
+                    )

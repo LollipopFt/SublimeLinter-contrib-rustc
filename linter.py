@@ -62,7 +62,7 @@ class Rustc(Linter):
                         message=long_message,
                         col=cspan['column_start']-1,
                         end_col=cspan['column_end']-1,
-                        error_type=cspan['level'],
+                        error_type=child['level'],
                         code=code,
                         filename=cspan['file_name']
                     )

@@ -52,17 +52,28 @@ class Rustc(Linter):
                     code = child['code']
                 else:
                     code = ''
-                for cspan in child['spans']:
-                    long_message = child['message']
-                    if cspan['suggested_replacement'] is not None:
-                        long_message += "\nsuggest: {}".format(cspan['suggested_replacement'])
+                if child['spans'] != []:
+                    for cspan in child['spans']:
+                        long_message = child['message']
+                        if cspan['suggested_replacement'] is not None:
+                            long_message += "\nsuggest: {}".format(cspan['suggested_replacement'])
+                        yield LintMatch(
+                            line=cspan['line_start']-1,
+                            end_line=cspan['line_end']-1,
+                            message=long_message,
+                            col=cspan['column_start']-1,
+                            end_col=cspan['column_end']-1,
+                            error_type=child['level'],
+                            code=code,
+                            filename=cspan['file_name']
+                        )
+                else:
                     yield LintMatch(
-                        line=cspan['line_start']-1,
-                        end_line=cspan['line_end']-1,
-                        message=long_message,
-                        col=cspan['column_start']-1,
-                        end_col=cspan['column_end']-1,
+                        line=0,
+                        end_line=0,
+                        message=child['message'],
+                        col=0,
+                        end_col=0,
                         error_type=child['level'],
-                        code=code,
-                        filename=cspan['file_name']
+                        code=code
                     )

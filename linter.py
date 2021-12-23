@@ -44,7 +44,22 @@ class Rustc(Linter):
                     code=code,
                     filename=span['file_name']
                 )
-
+                for child in error['children']:
+                    if child['spans'] == []:
+                        if child['code'] is not None:
+                            code = child['code']
+                        else:
+                            code = ''
+                        yield LintMatch(
+                            line=span['line_start']-1,
+                            end_line=span['line_end']-1,
+                            message=child['message'],
+                            col=span['column_start']-1,
+                            end_col=span['column_end']-1,
+                            error_type=child['level'],
+                            code=code,
+                            filename=span['file_name']
+                        )
             if error['children'] == []:
                 continue
             for child in error['children']:
@@ -67,13 +82,3 @@ class Rustc(Linter):
                             code=code,
                             filename=cspan['file_name']
                         )
-                else:
-                    yield LintMatch(
-                        line=0,
-                        end_line=0,
-                        message=child['message'],
-                        col=0,
-                        end_col=0,
-                        error_type=child['level'],
-                        code=code
-                    )

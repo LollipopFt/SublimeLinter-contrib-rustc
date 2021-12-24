@@ -44,6 +44,21 @@ class Rustc(Linter):
                     code=code,
                     filename=span['file_name']
                 )
+
+                elong_message = error['message']
+                if span['expansion']['span']['suggested_replacement'] is not None:
+                    elong_message += "\nsuggest: {}".format(span['expansion']['span']['suggested_replacement'])
+
+                yield LintMatch(
+                    line=span['expansion']['span']['line_start']-1,
+                    end_line=span['expansion']['span']['line_end']-1,
+                    message=elong_message,
+                    col=span['expansion']['span']['column_start']-1,
+                    end_col=span['expansion']['span']['column_end']-1,
+                    error_type=span['level'],
+                    code=code,
+                    filename=span['expansion']['span']['file_name']
+                )
                 for child in error['children']:
                     if child['spans'] == []:
                         if child['code'] is not None:

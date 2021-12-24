@@ -60,6 +60,17 @@ class Rustc(Linter):
                             code=code,
                             filename=span['file_name']
                         )
+                        if span['expansion'] is not None:
+                            yield LintMatch(
+                                line=span['expansion']['span']['line_start'],
+                                end_line=span['expansion']['span']['line_end'],
+                                message=child['message'],
+                                col=span['expansion']['span']['column_start'],
+                                end_col=span['expansion']['span']['column_end'],
+                                error_type=child['level'],
+                                code=code,
+                                filename=span['expansion']['span']['file_name']
+                            )
             if error['children'] == []:
                 continue
             for child in error['children']:

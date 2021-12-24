@@ -62,11 +62,11 @@ class Rustc(Linter):
                         )
                         if span['expansion'] is not None:
                             yield LintMatch(
-                                line=span['expansion']['span']['line_start'],
-                                end_line=span['expansion']['span']['line_end'],
+                                line=span['expansion']['span']['line_start']-1,
+                                end_line=span['expansion']['span']['line_end']-1,
                                 message=child['message'],
-                                col=span['expansion']['span']['column_start'],
-                                end_col=span['expansion']['span']['column_end'],
+                                col=span['expansion']['span']['column_start']-1,
+                                end_col=span['expansion']['span']['column_end']-1,
                                 error_type=child['level'],
                                 code=code,
                                 filename=span['expansion']['span']['file_name']

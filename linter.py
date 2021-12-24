@@ -55,7 +55,7 @@ class Rustc(Linter):
                     message=elong_message,
                     col=span['expansion']['span']['column_start']-1,
                     end_col=span['expansion']['span']['column_end']-1,
-                    error_type=span['level'],
+                    error_type=error['level'],
                     code=code,
                     filename=span['expansion']['span']['file_name']
                 )

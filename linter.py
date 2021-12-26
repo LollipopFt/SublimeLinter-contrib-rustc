@@ -13,7 +13,7 @@ class Rustc(Linter):
 
     def find_errors(self, output):
 
-        for i in output.split('\n'):
+        for i in output.splitlines():
 
             try:
                 error = json.loads(i)

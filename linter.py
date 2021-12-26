@@ -46,6 +46,7 @@ class Rustc(Linter):
                 )
 
                 elong_message = error['message']
+                print(span['expansion']['span']['suggested_replacement'])
                 if span['expansion']['span']['suggested_replacement'] is not None:
                     elong_message += "\nsuggest: {}".format(span['expansion']['span']['suggested_replacement'])
 

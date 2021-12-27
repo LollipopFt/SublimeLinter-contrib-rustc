@@ -12,54 +12,44 @@ class Rustc(Linter):
     on_stderr = None
 
     def find_errors(self, output):
-
         for i in output.splitlines():
-
             try:
                 error = json.loads(i)
             except ValueError:
                 continue
-
             if error['spans'] == []:
                 continue
-
             if error['code'] is not None:
                 code = error['code']['code']
             else:
                 code = ''
-
             for span in error['spans']:
-                long_message = error['message']
-
+                message = error['message']
                 if span['suggested_replacement'] is not None:
-                    long_message += "\nsuggest: {}".format(span['suggested_replacement'])
-
+                    err_msg = message+"\nsuggest: {}".format(span['suggested_replacement'])
                 yield LintMatch(
                     line=span['line_start']-1,
                     end_line=span['line_end']-1,
-                    message=long_message,
+                    message=err_msg,
                     col=span['column_start']-1,
                     end_col=span['column_end']-1,
                     error_type=error['level'],
                     code=code,
                     filename=span['file_name']
                 )
-
-                elong_message = error['message']
-                print(span['expansion'])
-                if span['expansion']['span']['suggested_replacement'] is not None:
-                    elong_message += "\nsuggest: {}".format(span['expansion']['span']['suggested_replacement'])
-
-                yield LintMatch(
-                    line=span['expansion']['span']['line_start']-1,
-                    end_line=span['expansion']['span']['line_end']-1,
-                    message=elong_message,
-                    col=span['expansion']['span']['column_start']-1,
-                    end_col=span['expansion']['span']['column_end']-1,
-                    error_type=error['level'],
-                    code=code,
-                    filename=span['expansion']['span']['file_name']
-                )
+                if span['expansion'] is not None:
+                    if span['expansion']['span']['suggested_replacement'] is not None:
+                        span_err_msg = message+"\nsuggest: {}".format(span['expansion']['span']['suggested_replacement'])
+                    yield LintMatch(
+                        line=span['expansion']['span']['line_start']-1,
+                        end_line=span['expansion']['span']['line_end']-1,
+                        message=span_err_msg,
+                        col=span['expansion']['span']['column_start']-1,
+                        end_col=span['expansion']['span']['column_end']-1,
+                        error_type=error['level'],
+                        code=code,
+                        filename=span['expansion']['span']['file_name']
+                    )
                 for child in error['children']:
                     if child['spans'] == []:
                         if child['code'] is not None:

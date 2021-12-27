@@ -24,9 +24,9 @@ class Rustc(Linter):
             else:
                 code = ''
             for span in error['spans']:
-                message = error['message']
+                msg = error['message']
                 if span['suggested_replacement'] is not None:
-                    err_msg = message+"\nsuggest: {}".format(span['suggested_replacement'])
+                    err_msg = msg+"\nsuggest: {}".format(span['suggested_replacement'])
                 yield LintMatch(
                     line=span['line_start']-1,
                     end_line=span['line_end']-1,
@@ -39,7 +39,7 @@ class Rustc(Linter):
                 )
                 if span['expansion'] is not None:
                     if span['expansion']['span']['suggested_replacement'] is not None:
-                        span_err_msg = message+"\nsuggest: {}".format(span['expansion']['span']['suggested_replacement'])
+                        span_err_msg = msg+"\nsuggest: {}".format(span['expansion']['span']['suggested_replacement'])
                     yield LintMatch(
                         line=span['expansion']['span']['line_start']-1,
                         end_line=span['expansion']['span']['line_end']-1,

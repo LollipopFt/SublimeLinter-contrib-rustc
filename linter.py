@@ -26,7 +26,7 @@ class Rustc(Linter):
             for span in error['spans']:
                 msg = error['message']
                 if (span['suggested_replacement'] is not None) & (span['suggested_replacement'] != ""):
-                    err_msg = msg+f"\n{span['suggestion_applicability']}: {span['suggested_replacement']}"
+                    err_msg = msg+"\n{}: {}".format(span['suggestion_applicability'], span['suggested_replacement'])
                 else:
                     err_msg = msg
                 yield LintMatch(
@@ -42,7 +42,7 @@ class Rustc(Linter):
                 if span['expansion'] is not None:
                     spaness = span['expansion']['span']['suggested_replacement']
                     if (spaness is not None) & (spaness != ""):
-                        span_err_msg = msg+f"\n{span['expansion']['span']['suggestion_applicability']}: {spaness}"
+                        span_err_msg = msg+"\n{}: {}".format(span['expansion']['span']['suggestion_applicability'], spaness)
                     else:
                         span_err_msg = msg
                     yield LintMatch(
@@ -94,7 +94,7 @@ class Rustc(Linter):
                         long_message = child['message']
                         cspans = cspan['suggested_replacement']
                         if (cspans is not None) & (cspans != ""):
-                            long_message += f"\n{cspan['suggestion_applicability']}: {cspans}"
+                            long_message += "\n{}: {}".format(cspan['suggestion_applicability'], cspans)
                         yield LintMatch(
                             line=cspan['line_start']-1,
                             end_line=cspan['line_end']-1,

@@ -25,8 +25,8 @@ class Rustc(Linter):
                 code = ''
             for span in error['spans']:
                 msg = error['message']
-                if span['suggested_replacement'] is not None:
-                    err_msg = msg+"\nsuggest: {}".format(span['suggested_replacement'])
+                if (span['suggested_replacement'] is not None) & (span['suggested_replacement'] != ""):
+                    err_msg = msg+f"\n{span['suggestion_applicability']}: {span['suggested_replacement']}"
                 else:
                     err_msg = msg
                 yield LintMatch(
@@ -40,8 +40,9 @@ class Rustc(Linter):
                     filename=span['file_name']
                 )
                 if span['expansion'] is not None:
-                    if span['expansion']['span']['suggested_replacement'] is not None:
-                        span_err_msg = msg+"\nsuggest: {}".format(span['expansion']['span']['suggested_replacement'])
+                    spaness = span['expansion']['span']['suggested_replacement']
+                    if (spaness is not None) & (spaness != ""):
+                        span_err_msg = msg+f"\n{span['expansion']['span']['suggestion_applicability']}: {spaness}"
                     else:
                         span_err_msg = msg
                     yield LintMatch(
@@ -91,8 +92,9 @@ class Rustc(Linter):
                 if child['spans'] != []:
                     for cspan in child['spans']:
                         long_message = child['message']
-                        if cspan['suggested_replacement'] is not None:
-                            long_message += "\nsuggest: {}".format(cspan['suggested_replacement'])
+                        cspans = cspan['suggested_replacement']
+                        if (cspans is not None) & (cspans != ""):
+                            long_message += f"\n{cspan['suggestion_applicability']}: {cspans}"
                         yield LintMatch(
                             line=cspan['line_start']-1,
                             end_line=cspan['line_end']-1,

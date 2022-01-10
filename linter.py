@@ -40,20 +40,20 @@ class Rustc(Linter):
                     filename=span['file_name']
                 )
                 if span['expansion'] is not None:
-                    spaness = span['expansion']['span']['suggested_replacement']
-                    if (spaness is not None) & (spaness != ""):
-                        span_err_msg = msg+"\n{}: {}".format(span['expansion']['span']['suggestion_applicability'], spaness)
+                    spanes = span['expansion']['span']
+                    if (spanes['suggested_replacement'] is not None) & (spanes['suggested_replacement'] != ""):
+                        span_err_msg = msg+"\n{}: {}".format(spanes['suggestion_applicability'], spanes['suggested_replacement'])
                     else:
                         span_err_msg = msg
                     yield LintMatch(
-                        line=span['expansion']['span']['line_start']-1,
-                        end_line=span['expansion']['span']['line_end']-1,
+                        line=spanes['line_start']-1,
+                        end_line=spanes['line_end']-1,
                         message=span_err_msg,
-                        col=span['expansion']['span']['column_start']-1,
-                        end_col=span['expansion']['span']['column_end']-1,
+                        col=spanes['column_start']-1,
+                        end_col=spanes['column_end']-1,
                         error_type=error['level'],
                         code=code,
-                        filename=span['expansion']['span']['file_name']
+                        filename=spanes['file_name']
                     )
                 for child in error['children']:
                     if child['spans'] == []:
@@ -72,15 +72,16 @@ class Rustc(Linter):
                             filename=span['file_name']
                         )
                         if span['expansion'] is not None:
+                            spanes = span['expansion']['span']
                             yield LintMatch(
-                                line=span['expansion']['span']['line_start']-1,
-                                end_line=span['expansion']['span']['line_end']-1,
+                                line=spanes['line_start']-1,
+                                end_line=spanes['line_end']-1,
                                 message=child['message'],
-                                col=span['expansion']['span']['column_start']-1,
-                                end_col=span['expansion']['span']['column_end']-1,
+                                col=spanes['column_start']-1,
+                                end_col=spanes['column_end']-1,
                                 error_type=child['level'],
                                 code=code,
-                                filename=span['expansion']['span']['file_name']
+                                filename=spanes['file_name']
                             )
             if error['children'] == []:
                 continue

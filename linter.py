@@ -1,17 +1,20 @@
 import json
-from SublimeLinter.lint import Linter, LintMatch, STREAM_STDERR
+import SublimeLinter.lint as SLlint  # Linter, LintMatch, STREAM_STDERR
 
 
-class Rustc(Linter):
+class Rustc(SLlint.Linter):
+    '''rustc linter'''
     cmd = ('rustc', '--error-format=json', '--emit=mir', '-o', '/dev/null', '${file}')
     defaults = {
         'selector': 'source.rust'
     }
-    error_stream = STREAM_STDERR
+    error_stream = SLlint.STREAM_STDERR
     name = 'rustc'
     on_stderr = None
 
     def find_errors(self, output):
+        '''function to find errors'''
+        lint_match = SLlint.LintMatch
         for i in output.splitlines():
             try:
                 error = json.loads(i)
@@ -29,7 +32,7 @@ class Rustc(Linter):
                     err_msg = msg+"\n{}: {}".format(span['suggestion_applicability'], span['suggested_replacement'])
                 else:
                     err_msg = msg
-                yield LintMatch(
+                yield lint_match(
                     line=span['line_start']-1,
                     end_line=span['line_end']-1,
                     message=err_msg,
@@ -45,7 +48,7 @@ class Rustc(Linter):
                         span_err_msg = msg+"\n{}: {}".format(spanes['suggestion_applicability'], spanes['suggested_replacement'])
                     else:
                         span_err_msg = msg
-                    yield LintMatch(
+                    yield lint_match(
                         line=spanes['line_start']-1,
                         end_line=spanes['line_end']-1,
                         message=span_err_msg,
@@ -61,7 +64,7 @@ class Rustc(Linter):
                             code = child['code']
                         else:
                             code = ''
-                        yield LintMatch(
+                        yield lint_match(
                             line=span['line_start']-1,
                             end_line=span['line_end']-1,
                             message=child['message'],
@@ -73,7 +76,7 @@ class Rustc(Linter):
                         )
                         if span['expansion'] is not None:
                             spanes = span['expansion']['span']
-                            yield LintMatch(
+                            yield lint_match(
                                 line=spanes['line_start']-1,
                                 end_line=spanes['line_end']-1,
                                 message=child['message'],
@@ -96,7 +99,7 @@ class Rustc(Linter):
                         cspans = cspan['suggested_replacement']
                         if (cspans is not None) & (cspans != ""):
                             long_message += "\n{}: {}".format(cspan['suggestion_applicability'], cspans)
-                        yield LintMatch(
+                        yield lint_match(
                             line=cspan['line_start']-1,
                             end_line=cspan['line_end']-1,
                             message=long_message,

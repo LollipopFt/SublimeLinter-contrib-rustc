@@ -15,6 +15,26 @@ class Rustc(SLlint.Linter):
     def find_errors(self, output):
         '''function to find errors'''
         lint_match = SLlint.LintMatch
+
+        def spanexpanse(msg, error, code, expanse, lint_match):
+            '''function to recurse ['expansion']'''
+            if expanse is not None:
+                spanes = expanse['span']
+                spanexpanse(msg, error, code, spanes['expansion'], lint_match)
+                if (spanes['suggested_replacement'] is not None) & (spanes['suggested_replacement'] != ""):
+                    span_err_msg = msg+"\n{}: {}".format(spanes['suggestion_applicability'], spanes['suggested_replacement'])
+                else:
+                    span_err_msg = msg
+                yield lint_match(
+                    line=spanes['line_start']-1,
+                    end_line=spanes['line_end']-1,
+                    message=span_err_msg,
+                    col=spanes['column_start']-1,
+                    end_col=spanes['column_end']-1,
+                    error_type=error['level'],
+                    code=code,
+                    filename=spanes['file_name']
+                )
         for i in output.splitlines():
             try:
                 error = json.loads(i)
@@ -42,6 +62,7 @@ class Rustc(SLlint.Linter):
                     code=code,
                     filename=span['file_name']
                 )
+                yield from spanexpanse(msg, error, code, span['expansion'], lint_match)
                 if span['expansion'] is not None:
                     spanes = span['expansion']['span']
                     if (spanes['suggested_replacement'] is not None) & (spanes['suggested_replacement'] != ""):

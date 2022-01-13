@@ -62,7 +62,7 @@ class Rustc(SLlint.Linter):
                     code=code,
                     filename=span['file_name']
                 )
-                spanexpanse(msg, error, code, span['expansion'], lint_match)
+                yield from spanexpanse(msg, error, code, span['expansion'], lint_match)
                 if span['expansion'] is not None:
                     spanes = span['expansion']['span']
                     if (spanes['suggested_replacement'] is not None) & (spanes['suggested_replacement'] != ""):

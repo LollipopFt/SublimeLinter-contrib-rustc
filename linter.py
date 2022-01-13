@@ -20,7 +20,7 @@ class Rustc(SLlint.Linter):
             '''function to recurse ['expansion']'''
             if expanse is not None:
                 spanes = expanse['span']
-                spanexpanse(msg, error, code, spanes['expansion'], lint_match)
+                yield from spanexpanse(msg, error, code, spanes['expansion'], lint_match)
                 if (spanes['suggested_replacement'] is not None) & (spanes['suggested_replacement'] != ""):
                     span_err_msg = msg+"\n{}: {}".format(spanes['suggestion_applicability'], spanes['suggested_replacement'])
                 else:

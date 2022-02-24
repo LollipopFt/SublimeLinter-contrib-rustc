@@ -21,8 +21,8 @@ class Rustc(SLlint.Linter):
             if expanse is not None:
                 spanes = expanse['span']
                 yield from spanexpanse(msg, error, code, spanes['expansion'], lint_match)
-                if (spanes['suggested_replacement'] is not None) & (spanes['suggested_replacement'] != ""):
-                    span_err_msg = msg+"\n{}: {}".format(spanes['suggestion_applicability'], spanes['suggested_replacement'])
+                if (spanes['label'] is not None) & (spanes['label'] != ""):
+                    span_err_msg = msg+"\n{}: {}".format(spanes['suggested_replacement'], spanes['label'])
                 else:
                     span_err_msg = msg
                 yield lint_match(
@@ -48,8 +48,8 @@ class Rustc(SLlint.Linter):
                 code = ''
             for span in error['spans']:
                 msg = error['message']
-                if (span['suggested_replacement'] is not None) & (span['suggested_replacement'] != ""):
-                    err_msg = msg+"\n{}: {}".format(span['suggestion_applicability'], span['suggested_replacement'])
+                if (span['label'] is not None) & (span['label'] != ""):
+                    err_msg = msg+"\n{}: {}".format(span['suggested_replacement'], span['label'])
                 else:
                     err_msg = msg
                 yield lint_match(
@@ -65,8 +65,8 @@ class Rustc(SLlint.Linter):
                 yield from spanexpanse(msg, error, code, span['expansion'], lint_match)
                 if span['expansion'] is not None:
                     spanes = span['expansion']['span']
-                    if (spanes['suggested_replacement'] is not None) & (spanes['suggested_replacement'] != ""):
-                        span_err_msg = msg+"\n{}: {}".format(spanes['suggestion_applicability'], spanes['suggested_replacement'])
+                    if (spanes['label'] is not None) & (spanes['label'] != ""):
+                        span_err_msg = msg+"\n{}: {}".format(spanes['suggested_replacement'], spanes['label'])
                     else:
                         span_err_msg = msg
                     yield lint_match(
@@ -117,9 +117,9 @@ class Rustc(SLlint.Linter):
                 if child['spans'] != []:
                     for cspan in child['spans']:
                         long_message = child['message']
-                        cspans = cspan['suggested_replacement']
+                        cspans = cspan['label']
                         if (cspans is not None) & (cspans != ""):
-                            long_message += "\n{}: {}".format(cspan['suggestion_applicability'], cspans)
+                            long_message += "\n{}: {}".format(cspan['suggested_replacement'], cspans)
                         yield lint_match(
                             line=cspan['line_start']-1,
                             end_line=cspan['line_end']-1,

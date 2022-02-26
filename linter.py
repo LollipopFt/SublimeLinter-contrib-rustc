@@ -1,3 +1,4 @@
+'''linter for single rust files'''
 import json
 import os
 import sys
@@ -7,6 +8,22 @@ import SublimeLinter.lint as SLlint    # Linter, LintMatch, STREAM_STDERR
 class Rustc(SLlint.Linter):
     '''rustc linter'''
 
+    def __init__(self):
+        path_init = self.context.get('file')
+        pathvec_init = path_init.replace('\\', '/').split('/')
+        pathvec_init.pop()
+        path = '/'.join(pathvec_init) + '/Cargo.toml'
+        for _ in range(0, 10):
+            if os.path.exists(path):
+                sys.exit()
+            else:
+                pathvec = path.split('/')
+                if len(pathvec) >= 3:
+                    pathvec.pop(-2)
+                    path = '/'.join(pathvec)
+                else:
+                    break
+
     cmd = (
         'rustc', '--error-format=json', '--emit=mir', '-o', '/dev/null',
         '${file}'
@@ -15,7 +32,7 @@ class Rustc(SLlint.Linter):
         'selector': 'source.rust'
     }
     error_stream = SLlint.STREAM_STDERR
-    name = 'rust'
+    name = 'rustc'
     on_stderr = None
     tempfile_suffix = '-'
 
@@ -25,24 +42,6 @@ class Rustc(SLlint.Linter):
 
     def find_errors(self, output):
         '''function to find errors'''
-
-        def pathtest(badpath):
-            pathvec_init = badpath.replace('\\', '/').split('/')
-            pathvec_init.pop()
-            path = '/'.join(pathvec_init) + '/Cargo.toml'
-            for _ in range(0, 10):
-                if os.path.exists(path):
-                    sys.exit()
-                else:
-                    pathvec = path.split('/')
-                    if len(pathvec) >= 3:
-                        pathvec.pop(-2)
-                        path = '/'.join(pathvec)
-                    else:
-                        break
-
-        path = self.context.get('file')
-        pathtest(path)
 
         def for_loop(spans_list, mainmessage, level, code, lint_match):
             '''yield lints'''
@@ -59,21 +58,14 @@ class Rustc(SLlint.Linter):
                 if spansobj['suggestion_applicability'] is not None:
                     if spansobj['suggestion_applicability'] != '':
                         msg += ' ('+spansobj['suggestion_applicability']+')'
+                if msg[0] == '\n':
+                    msg = msg[1:]
                 return msg
 
             for spansobj in spans_list:
-                msg = labelcheck(mainmessage, spansobj)
-                yield lint_match(
-                    filename=spansobj['file_name'],
-                    line=spansobj['line_start']-1,
-                    end_line=spansobj['line_end']-1,
-                    col=spansobj['column_start']-1,
-                    end_col=spansobj['column_end']-1,
-                    error_type=level,
-                    code=code,
-                    message=msg
-                )
+                msg = ''
                 if spansobj['is_primary'] is True:
+                    msg = labelcheck(mainmessage, spansobj)
                     for child in compiled['children']:
                         if not child['spans']:
                             if child['code'] is None:
@@ -90,6 +82,18 @@ class Rustc(SLlint.Linter):
                                 code=code,
                                 message=child['message']
                             )
+                else:
+                    msg = labelcheck('', spansobj)
+                yield lint_match(
+                    filename=spansobj['file_name'],
+                    line=spansobj['line_start']-1,
+                    end_line=spansobj['line_end']-1,
+                    col=spansobj['column_start']-1,
+                    end_col=spansobj['column_end']-1,
+                    error_type=level,
+                    code=code,
+                    message=msg
+                )
                 if spansobj['expansion'] is None:
                     continue
                 yield from for_loop(

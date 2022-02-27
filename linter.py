@@ -28,8 +28,11 @@ class Rustc(SLlint.Linter):
         path = '/'.join(pathvec_init) + '/Cargo.toml'
         for _ in range(0, 10):
             if os.path.exists(path):
+                print(path)
+                print('exiting before running rustc')
                 sys.exit()
             else:
+                print(path)
                 pathvec = path.split('/')
                 if len(pathvec) >= 3:
                     pathvec.pop(-2)

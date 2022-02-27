@@ -8,7 +8,20 @@ import SublimeLinter.lint as SLlint    # Linter, LintMatch, STREAM_STDERR
 class Rustc(SLlint.Linter):
     '''rustc linter'''
 
-    def __init__(self):
+    cmd = (
+        'rustc', '--error-format=json', '--emit=mir', '-o', '/dev/null',
+        '${file}'
+    )
+    defaults = {
+        'selector': 'source.rust'
+    }
+    error_stream = SLlint.STREAM_STDERR
+    name = 'rustc'
+    on_stderr = None
+    tempfile_suffix = '-'
+
+    def run(self, cmd, code):
+        '''placeholder'''
         path_init = self.context.get('file')
         pathvec_init = path_init.replace('\\', '/').split('/')
         pathvec_init.pop()
@@ -23,22 +36,7 @@ class Rustc(SLlint.Linter):
                     path = '/'.join(pathvec)
                 else:
                     break
-
-    cmd = (
-        'rustc', '--error-format=json', '--emit=mir', '-o', '/dev/null',
-        '${file}'
-    )
-    defaults = {
-        'selector': 'source.rust'
-    }
-    error_stream = SLlint.STREAM_STDERR
-    name = 'rustc'
-    on_stderr = None
-    tempfile_suffix = '-'
-
-    def init(self):
-        '''placeholder'''
-        print(self)
+        return super().run(cmd, code)
 
     def find_errors(self, output):
         '''function to find errors'''

@@ -60,26 +60,31 @@ class Rustc(SLlint.Linter):
                     msg = msg[1:]
                 return msg
 
+            def childloop(spansobj, compiled):
+                for child in compiled['children']:
+                    if not child['spans']:
+                        if child['code'] is None:
+                            code = ''
+                        else:
+                            code = child['code']
+                        yield lint_match(
+                            filename=spansobj['file_name'],
+                            line=spansobj['line_start']-1,
+                            end_line=spansobj['line_end']-1,
+                            col=spansobj['column_start']-1,
+                            end_col=spansobj['column_end']-1,
+                            error_type=child['level'],
+                            code=code,
+                            message=child['message']
+                        )
+
             for spansobj in spans_list:
                 msg = ''
+                primary = False
                 if spansobj['is_primary'] is True:
+                    primary = True
                     msg = labelcheck(mainmessage, spansobj)
-                    for child in compiled['children']:
-                        if not child['spans']:
-                            if child['code'] is None:
-                                code = ''
-                            else:
-                                code = child['code']
-                            yield lint_match(
-                                filename=spansobj['file_name'],
-                                line=spansobj['line_start']-1,
-                                end_line=spansobj['line_end']-1,
-                                col=spansobj['column_start']-1,
-                                end_col=spansobj['column_end']-1,
-                                error_type=child['level'],
-                                code=code,
-                                message=child['message']
-                            )
+                    yield from childloop(spansobj, compiled)
                 else:
                     msg = labelcheck('', spansobj)
                 yield lint_match(
@@ -94,9 +99,22 @@ class Rustc(SLlint.Linter):
                 )
                 if spansobj['expansion'] is None:
                     continue
-                yield from for_loop(
-                    spansobj['expansion']['span'],
-                    mainmessage, level, code, lint_match
+                msg = ''
+                span = spansobj['expansion']['span']
+                if primary is True:
+                    msg = labelcheck(mainmessage, span)
+                    yield from childloop(span, compiled)
+                else:
+                    msg = labelcheck('', span)
+                yield lint_match(
+                    filename=span['file_name'],
+                    line=span['line_start']-1,
+                    end_line=span['line_end']-1,
+                    col=span['column_start']-1,
+                    end_col=span['column_end']-1,
+                    error_type=level,
+                    code=code,
+                    message=msg
                 )
 
         lint_match = SLlint.LintMatch

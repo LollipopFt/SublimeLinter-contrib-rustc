@@ -56,7 +56,7 @@ class Rustc(SLlint.Linter):
                 if spansobj['suggestion_applicability'] is not None:
                     if spansobj['suggestion_applicability'] != '':
                         msg += ' ('+spansobj['suggestion_applicability']+')'
-                if msg[0] == '\n':
+                if (message == '') & (len(msg) > 0):
                     msg = msg[1:]
                 return msg
 
